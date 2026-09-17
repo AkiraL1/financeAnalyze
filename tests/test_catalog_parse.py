@@ -9,6 +9,10 @@ def test_parse_product_tables():
 | --- | --- | --- | --- |
 | GC | Gold / 黄金 | COMEX |  |
 | SI | Silver / 白银 | COMEX |  |
+
+| 缩写 | 全称 | 用途 |
+| --- | --- | --- |
+| CFTC | Commodity Futures Trading Commission | COT |
 """
     products = parse_product_tables(text, "metals")
     assert [item.code for item in products] == ["GC", "SI"]

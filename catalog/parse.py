@@ -1,22 +1,27 @@
 from catalog.models import Product
 
-_SKIP_CODES = {"代码", "简称", "类别", "缩写", "缩写 / 来源"}
+_PRODUCT_HEADERS = {"代码", "简称"}
 
 
 def parse_product_tables(text: str, sector: str) -> list[Product]:
     products: list[Product] = []
     seen: set[str] = set()
+    in_product_table = False
     for raw in text.splitlines():
         line = raw.strip()
         if not line.startswith("|"):
+            in_product_table = False
             continue
         cells = [cell.strip() for cell in line.strip("|").split("|")]
         if len(cells) < 3:
             continue
         code, name, exchange = cells[0], cells[1], cells[2]
-        if not code or code in _SKIP_CODES:
+        if code in _PRODUCT_HEADERS:
+            in_product_table = True
             continue
         if set(code.replace(":", "")) <= {"-"}:
+            continue
+        if not in_product_table or not code:
             continue
         key = code.upper()
         if key in seen:

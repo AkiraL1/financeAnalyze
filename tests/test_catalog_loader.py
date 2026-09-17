@@ -28,6 +28,7 @@ def test_load_vendored_futures_catalog():
     catalog = load_catalog()
     assert catalog.get("GC") is not None
     assert catalog.get("CL") is not None
+    assert catalog.get("USDA") is None
     ids = {sector.id for sector in catalog.sectors}
     assert {"agricultural", "energy", "metals", "crypto"} <= ids
     energy_rb = catalog.get("RB", sector="energy")
