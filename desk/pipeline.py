@@ -33,22 +33,23 @@ def build_briefing(
     if include_oracle:
         oracle = (gateway or live_gateway()).snapshot(instrument)
     report = compose_report(instrument, mode, oracle)
-    notes = compose_notes(instrument, oracle)
+    extra: list[str] = []
     analyst = "template"
     trace: list[dict[str, object]] = []
     client = llm_client if llm_client is not None else default_client()
     use_llm = include_llm if include_llm is not None else client is not None
     if use_llm:
         if client is None:
-            notes.append("未配置 MINIMAX_API_KEY，回退模板填充。")
+            extra.append("未配置 MINIMAX_API_KEY，回退模板填充。")
         else:
             try:
                 report, oracle, analyst, extra, trace = _fill_with_model(
                     instrument, mode, oracle, client, gateway
                 )
-                notes.extend(extra)
             except Exception as exc:  # noqa: BLE001 - fall back to template
-                notes.append(f"MiniMax 调用失败，回退模板：{type(exc).__name__}")
+                extra = [f"MiniMax 调用失败，回退模板：{type(exc).__name__}"]
+    notes = compose_notes(instrument, oracle)
+    notes.extend(extra)
     return DeskBriefing(
         product=instrument,
         sector=mode,
