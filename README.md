@@ -41,8 +41,17 @@ python -m finance_analyze.main desk --code CL --oracle
 uvicorn apps.api.main:app --reload
 ```
 
-- 看板：http://127.0.0.1:8000/
-- OpenAPI：http://127.0.0.1:8000/docs
+看板在 http://127.0.0.1:8000/ ，界面按个人理财工作台的信息架构组织：
+
+- 工作台总览
+- 关注品种（默认观察池，**不是**实盘持仓）
+- 品种诊断
+- 市场资讯
+- 每日简报（可复制 / 下载 Markdown）
+- 标的研究
+- 研究摘录
+
+实时 Yahoo 价格需要可选依赖 `yfinance`（`pip install -e ".[oracle]"`）。其它 digital-oracle 信号仍可在「市场资讯 → 抓取」或诊断页勾选后拉取。
 
 ## 测试
 
