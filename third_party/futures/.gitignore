@@ -1,0 +1,90 @@
+# ============================================================
+# Futures — 个人期货品种分析项目 .gitignore
+# ============================================================
+
+# ---------- 敏感档案：交易档案实例（默认不入仓） ----------
+# 仅模板（TEMPLATE.md）随项目提交；实例由用户在本地填写
+profile/trading-profile.md
+profile/*-profile.md
+
+# ---------- 系统与编辑器 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Cursor / VSCode
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/workspace.json
+.cursor/worktrees/
+
+# ---------- Python（若使用脚本抓取数据） ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+
+# ---------- Node.js（若使用 ego-browser 配套脚本） ----------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ---------- 数据与缓存（行情 / 持仓 / 笔记草稿） ----------
+data/
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.pickle
+*.pkl
+*.h5
+*.hdf5
+
+# ---------- 临时与构建产物 ----------
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+build/
+dist/
+out/
+cache/
+tmp/
+Temp/
+
+# ---------- Office 与二进制 ----------
+*.exe
+*.dll
+*.so
+*.dylib
+*.zip
+*.tar.gz
+*.7z
+*.rar
+*.pdf
+!profile/TEMPLATE.md
+
+# ---------- 密钥与凭证 ----------
+.env
+.env.*
+*.pem
+*.key
+*.crt
+credentials.json
+secrets.yaml
+secrets.yml

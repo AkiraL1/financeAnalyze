@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>financeAnalyze 分析台</title>
+  <style>
+    :root { --bg:#070b12; --panel:#101826; --line:#1e2a3d; --ink:#d7e3f4; --dim:#8ea0b8; --accent:#d4a017; --green:#3dd68c; --red:#ff6b6b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font: 14px/1.45 "IBM Plex Sans", "Noto Sans SC", sans-serif; background:var(--bg); color:var(--ink); }
+    header { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:16px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+    .sub { color:var(--dim); font-size:12px; }
+    .layout { display:grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 52px); }
+    aside { border-right:1px solid var(--line); padding:12px; overflow:auto; }
+    main { padding:16px 20px; overflow:auto; }
+    .sector { width:100%; text-align:left; background:transparent; color:var(--ink); border:0; padding:8px; cursor:pointer; }
+    .sector.active { background:var(--panel); color:var(--accent); }
+    .product { display:flex; justify-content:space-between; gap:8px; padding:7px 8px; cursor:pointer; border-bottom:1px solid var(--line); }
+    .product:hover, .product.active { background:#162033; }
+    code { color:var(--green); }
+    .grid { display:grid; grid-template-columns: 1.2fr .8fr; gap:12px; }
+    .card { background:var(--panel); border:1px solid var(--line); padding:14px; }
+    .card h2 { margin:0 0 8px; font-size:13px; color:var(--accent); letter-spacing:.06em; }
+    ul { margin:8px 0; padding-left:18px; color:var(--dim); }
+    button.act { background:var(--accent); color:#111; border:0; padding:8px 12px; cursor:pointer; font-weight:700; }
+    .err { color:var(--red); }
+    pre { white-space:pre-wrap; color:var(--dim); font-size:12px; }
+    @media (max-width: 900px) { .layout, .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>financeAnalyze</h1>
+      <div class="sub">Futures 知识库 × digital-oracle 市场价格信号</div>
+    </div>
+    <label class="sub"><input type="checkbox" id="oracle" /> 拉取市场信号</label>
+  </header>
+  <div class="layout">
+    <aside>
+      <div id="sectors"></div>
+      <div id="products"></div>
+    </aside>
+    <main>
+      <div class="card" style="margin-bottom:12px">
+        <div class="sub" id="status">选择左侧品种。</div>
+        <h2 id="title">分析台</h2>
+        <p id="summary"></p>
+        <button class="act" id="refresh" type="button">生成简报</button>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h2>知识库摘录</h2>
+          <ul id="bullets"></ul>
+          <div id="cases"></div>
+        </div>
+        <div class="card">
+          <h2>综合备注</h2>
+          <ul id="notes"></ul>
+          <h2>Oracle</h2>
+          <pre id="oracleBox">未拉取</pre>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    const state = { sector: null, code: null, products: [] };
+    const $ = (id) => document.getElementById(id);
+
+    async function loadSectors() {
+      const data = await (await fetch("/api/sectors")).json();
+      $("sectors").innerHTML = data.sectors.map(s =>
+        `<button class="sector" data-id="${s.id}">${s.title} · ${s.product_count}</button>`
+      ).join("");
+      document.querySelectorAll(".sector").forEach(btn => btn.onclick = () => selectSector(btn.dataset.id));
+      if (data.sectors[0]) selectSector(data.sectors[0].id);
+    }
+
+    async function selectSector(id) {
+      state.sector = id;
+      document.querySelectorAll(".sector").forEach(btn => btn.classList.toggle("active", btn.dataset.id === id));
+      const data = await (await fetch("/api/products?sector=" + encodeURIComponent(id))).json();
+      state.products = data.products;
+      $("products").innerHTML = data.products.map(p =>
+        `<div class="product" data-code="${p.code}"><code>${p.code}</code><span>${p.name}</span></div>`
+      ).join("");
+      document.querySelectorAll(".product").forEach(el => el.onclick = () => selectProduct(el.dataset.code));
+      if (data.products[0]) selectProduct(data.products[0].code);
+    }
+
+    function selectProduct(code) {
+      state.code = code;
+      document.querySelectorAll(".product").forEach(el => el.classList.toggle("active", el.dataset.code === code));
+      const p = state.products.find(x => x.code === code);
+      $("title").textContent = p ? `${p.code}  ${p.name}` : code;
+      $("summary").textContent = p ? `${p.exchange} · ${p.sector}` : "";
+    }
+
+    async function loadDesk() {
+      if (!state.code) return;
+      const oracle = $("oracle").checked ? "true" : "false";
+      $("status").textContent = "生成中…";
+      const sector = state.sector ? `&sector=${encodeURIComponent(state.sector)}` : "";
+      const res = await fetch(`/api/desk/${encodeURIComponent(state.code)}?oracle=${oracle}${sector}`);
+      const data = await res.json();
+      if (!res.ok) {
+        $("status").innerHTML = `<span class="err">${data.detail || "失败"}</span>`;
+        return;
+      }
+      $("status").textContent = data.knowledge_disclaimer;
+      $("title").textContent = `${data.product.code}  ${data.product.name}`;
+      $("summary").textContent = data.sector.summary || data.sector.title;
+      $("bullets").innerHTML = (data.sector.bullets || []).map(x => `<li>${x}</li>`).join("") || "<li>本模块 README 暂无季节性/日历条目</li>";
+      $("cases").innerHTML = (data.cases || []).map(c => `<pre>${c.title}\n${c.excerpt}</pre>`).join("") || "<p class='sub'>尚无 cases</p>";
+      $("notes").innerHTML = (data.notes || []).map(x => `<li>${x}</li>`).join("");
+      $("oracleBox").textContent = data.oracle
+        ? JSON.stringify({ results: Object.keys(data.oracle.results || {}), errors: data.oracle.errors }, null, 2)
+        : "未拉取";
+    }
+
+    $("refresh").onclick = loadDesk;
+    loadSectors().catch(err => $("status").textContent = String(err));
+  </script>
+</body>
+</html>

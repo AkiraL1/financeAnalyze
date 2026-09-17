@@ -1,0 +1,1 @@
+"""financeAnalyze CLI."""
