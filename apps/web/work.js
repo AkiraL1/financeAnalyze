@@ -53,8 +53,8 @@ function renderDiagnose(data) {
       <div class="card">
         <h2>${esc(data.product.code)} ${esc(data.product.name)}</h2>
         <p class="muted">${esc(data.knowledge_disclaimer)}</p>
-        <ul>${(data.sector.bullets || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-        ${(data.cases || []).map((item) => `<pre class="muted">${esc(item.excerpt)}</pre>`).join("")}
+        <ul>${(data.sector.bullets || []).map((item) => `<li>${esc(stripMd(item))}</li>`).join("")}</ul>
+        ${(data.cases || []).map((item) => `<pre class="muted">${esc(stripMd(item.excerpt))}</pre>`).join("")}
       </div>
       <div class="card">
         <h2>综合备注</h2>
@@ -89,7 +89,7 @@ views.intel = async function intel() {
         <div class="card news-item">
           <div class="muted">${esc(item.source)} · ${esc(item.related)}</div>
           <h3>${esc(item.title)}</h3>
-          <div>${esc(item.body)}</div>
+          <div>${esc(stripMd(item.body))}</div>
         </div>`).join("")}
     </div>
   `;

@@ -29,7 +29,7 @@ views.overview = async function overview() {
         ${(data.cases || []).slice(0, 3).map((item) => `
           <div class="news-item">
             <h3>${esc(item.title)}</h3>
-            <pre class="muted">${esc(item.excerpt)}</pre>
+            <pre class="muted">${esc(stripMd(item.excerpt))}</pre>
           </div>`).join("") || "<p class='muted'>暂无 cases</p>"}
       </div>
     </div>
@@ -129,7 +129,7 @@ views.notes = async function notes() {
         <div class="card news-item">
           <div class="muted">${esc(item.sector)} · ${esc(item.relpath)}</div>
           <h3>${esc(item.title)}</h3>
-          <pre class="muted">${esc(item.excerpt)}</pre>
+          <pre class="muted">${esc(stripMd(item.excerpt))}</pre>
         </div>`).join("") || "<div class='card muted'>尚无案例</div>"}
     </div>
   `;
