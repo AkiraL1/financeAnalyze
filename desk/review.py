@@ -13,6 +13,7 @@ def build_review(catalog: Catalog | None = None, *, include_oracle: bool = False
         briefing = build_briefing(
             instrument.code,
             include_oracle=include_oracle,
+            include_llm=False,
             sector=instrument.sector,
             catalog=loaded,
         )

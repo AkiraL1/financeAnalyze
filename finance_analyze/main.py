@@ -16,9 +16,14 @@ def _cmd_catalog() -> int:
     return 0
 
 
-def _cmd_desk(code: str, oracle: bool, sector: str | None) -> int:
+def _cmd_desk(code: str, oracle: bool, sector: str | None, llm: bool | None) -> int:
     try:
-        briefing = build_briefing(code, include_oracle=oracle, sector=sector)
+        briefing = build_briefing(
+            code,
+            include_oracle=oracle,
+            include_llm=llm,
+            sector=sector,
+        )
     except KeyError as exc:
         print(f"未找到品种：{exc}")
         return 1
@@ -34,10 +39,16 @@ def main(argv: list[str] | None = None) -> int:
     desk.add_argument("--code", required=True, help="品种代码，如 GC / CL / ES")
     desk.add_argument("--sector", help="分析模式 id，如 energy / metals")
     desk.add_argument("--oracle", action="store_true", help="拉取 digital-oracle 信号")
+    desk.add_argument(
+        "--llm",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="用 MiniMax 按六段模式写分析正文（默认：已配置密钥则启用）",
+    )
     args = parser.parse_args(argv)
     if args.cmd == "catalog":
         return _cmd_catalog()
-    return _cmd_desk(args.code, args.oracle, args.sector)
+    return _cmd_desk(args.code, args.oracle, args.sector, args.llm)
 
 
 if __name__ == "__main__":

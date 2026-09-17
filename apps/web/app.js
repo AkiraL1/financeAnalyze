@@ -2,7 +2,7 @@ const state = {
   page: "overview",
   overview: null,
   board: null,
-  diagnose: { sector: "metals", code: "GC", data: null, oracle: false },
+  diagnose: { sector: "metals", code: "GC", data: null, oracle: false, llm: true },
   intel: { live: false, data: null, kind: "all" },
   review: null,
 };

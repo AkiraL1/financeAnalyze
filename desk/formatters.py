@@ -7,7 +7,7 @@ def format_briefing(briefing: DeskBriefing) -> str:
     product = briefing.product
     lines = [
         f"# {product.code}  {product.name}",
-        f"交易所：{product.exchange}    模式：{briefing.sector.label}",
+        f"交易所：{product.exchange}    模式：{briefing.sector.label}    分析员：{briefing.analyst}",
         "",
         briefing.knowledge_disclaimer,
         "",
@@ -50,4 +50,5 @@ def briefing_payload(briefing: DeskBriefing) -> dict:
         "oracle": oracle,
         "notes": briefing.notes,
         "knowledge_disclaimer": briefing.knowledge_disclaimer,
+        "analyst": briefing.analyst,
     }

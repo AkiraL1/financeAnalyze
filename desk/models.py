@@ -12,3 +12,4 @@ class DeskBriefing:
     oracle: OracleSnapshot | None
     notes: list[str]
     knowledge_disclaimer: str
+    analyst: str = "template"

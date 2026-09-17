@@ -5,7 +5,7 @@ from oracle.gateway import OracleGateway
 
 
 def test_build_briefing_without_oracle():
-    briefing = build_briefing("GC", include_oracle=False)
+    briefing = build_briefing("GC", include_oracle=False, include_llm=False)
     assert briefing.product.code == "GC"
     assert briefing.oracle is None
     keys = [section["key"] for section in briefing.report]
@@ -28,6 +28,7 @@ def test_build_briefing_with_fake_oracle():
     briefing = build_briefing(
         "GC",
         include_oracle=True,
+        include_llm=False,
         catalog=catalog,
         gateway=OracleGateway(fetchers_for=fetchers_for),
     )

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "finance-analyze"
 version = "0.1.0"
-description = "金融分析台：Futures 品种知识库 + digital-oracle 市场价格信号。"
+description = "金融分析台：Futures 分析模式 + MiniMax 六段报告 + digital-oracle 市场信号。"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.110",

@@ -6,10 +6,11 @@ views.diagnose = async function diagnose() {
   }
   const extra = `
     <label class="muted"><input type="checkbox" id="oracleToggle" ${state.diagnose.oracle ? "checked" : ""}/> 拉取市场信号</label>
+    <label class="muted"><input type="checkbox" id="llmToggle" ${state.diagnose.llm ? "checked" : ""}/> MiniMax 分析</label>
     <button class="btn" id="runDiagnose">生成诊断</button>
   `;
   $("page").innerHTML = `
-    ${pageHead("品种诊断", "按六段分析模式填写；信号来自 digital-oracle")}
+    ${pageHead("品种诊断", "六段正文默认由 MiniMax 填写；信号来自 digital-oracle")}
     <div class="card" style="margin-bottom:12px">
       <div class="tabs">
         ${sectors.sectors.map((item) => `<button data-sector="${esc(item.id)}" class="${item.id === state.diagnose.sector ? "active" : ""}">${esc(item.id)}</button>`).join("")}
@@ -36,8 +37,9 @@ views.diagnose = async function diagnose() {
 
 async function runDiagnose() {
   state.diagnose.oracle = $("oracleToggle").checked;
+  state.diagnose.llm = $("llmToggle").checked;
   state.diagnose.code = $("codeSelect").value;
-  const url = `/api/desk/${encodeURIComponent(state.diagnose.code)}?oracle=${state.diagnose.oracle}&sector=${encodeURIComponent(state.diagnose.sector)}`;
+  const url = `/api/desk/${encodeURIComponent(state.diagnose.code)}?oracle=${state.diagnose.oracle}&llm=${state.diagnose.llm}&sector=${encodeURIComponent(state.diagnose.sector)}`;
   $("diagnoseBody").textContent = "生成中…";
   try {
     state.diagnose.data = await getJson(url);
@@ -52,7 +54,7 @@ function renderDiagnose(data) {
     <div class="split">
       <div class="card">
         <h2>${esc(data.product.code)} ${esc(data.product.name)}</h2>
-        <p class="muted">${esc(data.knowledge_disclaimer)}</p>
+        <p class="muted">分析员 ${esc(data.analyst || "template")} · ${esc(data.knowledge_disclaimer)}</p>
         ${(data.report || []).map((section) => `
           <h2>${esc(section.title)}</h2>
           <ul>${(section.body || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
