@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>financeAnalyze 分析台</title>
+  <link rel="stylesheet" href="/static/desk.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo">析</div>
+        <div>
+          <strong>financeAnalyze</strong>
+          <div class="muted">FUTURES DESK</div>
+        </div>
+      </div>
+      <nav id="nav">
+        <button data-page="overview" class="active">工作台总览</button>
+        <button data-page="board">关注品种</button>
+        <button data-page="diagnose">品种诊断</button>
+        <button data-page="intel">市场资讯</button>
+        <button data-page="review">每日简报</button>
+        <button data-page="research">分析模式</button>
+        <button data-page="notes">报告模板</button>
+      </nav>
+      <div class="snap">
+        <div class="muted">当前快照</div>
+        <div id="snapTime">—</div>
+        <div class="muted">Futures 模式 · MiniMax · digital-oracle</div>
+      </div>
+      <div class="side-foot muted">不生成未核验合约规格 · 观察池不是持仓</div>
+    </aside>
+    <section class="workspace">
+      <div class="ticker">
+        <span class="live">LIVE</span>
+        <div class="tape" id="tape">加载关注品种…</div>
+        <div class="ticker-actions">
+          <span class="pill" id="clock">—</span>
+          <button type="button" class="btn" id="refreshBtn">刷新</button>
+        </div>
+      </div>
+      <div class="indices" id="indices"></div>
+      <main class="page" id="page"></main>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/views.js"></script>
+  <script src="/static/work.js"></script>
+</body>
+</html>

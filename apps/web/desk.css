@@ -1,0 +1,96 @@
+:root {
+  --bg: #090b10;
+  --side: #0c1017;
+  --panel: #121821;
+  --line: #222b38;
+  --ink: #e7eef8;
+  --muted: #8b9bb0;
+  --orange: #e3920f;
+  --green: #37d27a;
+  --red: #ff5d5d;
+  --chip: #1a2230;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--bg);
+  font: 13px/1.45 "Segoe UI", "Noto Sans SC", sans-serif;
+}
+.app { display: grid; grid-template-columns: 228px 1fr; min-height: 100%; }
+.side {
+  background: var(--side);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+}
+.brand { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; }
+.logo {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--orange); color: #111; font-weight: 800;
+  display: grid; place-items: center;
+}
+.muted { color: var(--muted); font-size: 12px; }
+nav { display: flex; flex-direction: column; gap: 4px; }
+nav button {
+  text-align: left; border: 0; background: transparent; color: var(--ink);
+  padding: 9px 10px; border-radius: 8px; cursor: pointer;
+}
+nav button.active { background: #1d1406; color: var(--orange); }
+.snap {
+  margin-top: auto; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px;
+}
+.side-foot { margin-top: 10px; font-size: 11px; }
+.workspace { display: flex; flex-direction: column; min-width: 0; }
+.ticker {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; border-bottom: 1px solid var(--line);
+}
+.live {
+  color: #111; background: var(--green); font-weight: 800;
+  padding: 2px 6px; border-radius: 4px; font-size: 11px;
+}
+.tape { flex: 1; overflow: hidden; white-space: nowrap; color: var(--muted); }
+.ticker-actions { display: flex; align-items: center; gap: 8px; }
+.pill { background: var(--chip); border: 1px solid var(--line); padding: 4px 8px; border-radius: 999px; }
+.btn {
+  background: var(--orange); color: #111; border: 0; font-weight: 700;
+  padding: 6px 12px; border-radius: 8px; cursor: pointer;
+}
+.btn.ghost { background: var(--chip); color: var(--ink); border: 1px solid var(--line); }
+.indices {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line);
+}
+.idx { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.idx b { display: block; font-size: 16px; }
+.page { padding: 16px 18px 24px; overflow: auto; }
+.page-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+h1 { margin: 0; font-size: 22px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+}
+.card h2 { margin: 0 0 10px; font-size: 13px; color: var(--orange); }
+.kpi-value { font-size: 28px; font-weight: 700; }
+.split { display: grid; grid-template-columns: 1.15fr .85fr; gap: 10px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; }
+.chip { display: inline-block; background: var(--chip); border-radius: 999px; padding: 2px 8px; margin-right: 4px; }
+.news-item div, .news-item pre { white-space: pre-wrap; word-break: break-word; }
+.news-item h3 { margin: 0 0 6px; font-size: 15px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.tabs button { background: var(--chip); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.tabs button.active { color: var(--orange); border-color: var(--orange); }
+.err { color: var(--red); }
+.row-actions { display: flex; gap: 6px; }
+canvas { max-height: 240px; }
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 1fr; }
+  .indices, .kpis, .split { grid-template-columns: 1fr 1fr; }
+  .side { display: none; }
+}

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finance-analyze"
+version = "0.1.0"
+description = "金融分析台：Futures 分析模式 + MiniMax 六段报告 + digital-oracle 市场信号。"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+oracle = [
+    "yfinance>=0.2",
+]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+finance-analyze = "finance_analyze.main:main"
+
+[tool.setuptools.packages.find]
+include = ["finance_analyze*", "catalog*", "oracle*", "desk*", "apps*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "third_party/digital-oracle"]
