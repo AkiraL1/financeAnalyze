@@ -105,6 +105,33 @@ def test_pipeline_uses_agent_when_complete_turn_exists():
     assert background["body"] == ["循环背景"]
 
 
+def test_wrap_up_submits_after_budget():
+    catalog = load_catalog()
+    instrument = catalog.get("GC")
+    mode = catalog.sector(instrument.sector)
+    client = ScriptedClient(
+        [
+            _call("plan_tasks", {"titles": ["写报告"]}, "1"),
+            _call(
+                "submit_report",
+                {
+                    "background": ["收尾背景"],
+                    "focus": ["收尾焦点"],
+                    "specs": ["待交易所官网核验"],
+                    "process": ["收尾过程"],
+                    "conclusion": ["证据不足"],
+                    "risks": ["收尾风险"],
+                },
+                "2",
+            ),
+        ]
+    )
+    result = fill_report_with_agent(instrument, mode, None, client, max_turns=1)
+    background = next(section for section in result.report if section["key"] == "background")
+    assert background["body"] == ["收尾背景"]
+    assert "submit_report" in result.tool_names
+
+
 def test_health_marks_agent():
     from fastapi.testclient import TestClient
 

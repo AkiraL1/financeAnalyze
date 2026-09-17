@@ -1,3 +1,1 @@
-from desk.agent.run import fill_report_with_agent
-
-__all__ = ["fill_report_with_agent"]
+"""MiniMax 任务循环：拆解、工具执行、浏览器快照。"""
