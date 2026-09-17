@@ -1,17 +1,17 @@
 from datetime import datetime, timezone
 
-from catalog.loader import load_catalog
-from catalog.models import Catalog, Product
+from catalog.models import Catalog, Instrument
 from catalog.oracle_map import resolve_route
-from desk.watchlist import FOCUS, SECTOR_LABELS
+from catalog.registry import load_catalog
+from catalog.template import REPORT_SECTIONS
 
 
 def _now() -> str:
     return datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
 
-def _product_row(product: Product, case_count: int) -> dict:
-    route = resolve_route(product.code, product)
+def _row(instrument: Instrument, label: str) -> dict:
+    route = resolve_route(instrument.code, instrument)
     signals = [name for name, flag in (
         ("价格", route.yahoo),
         ("COT", route.cftc),
@@ -20,61 +20,46 @@ def _product_row(product: Product, case_count: int) -> dict:
     ) if flag]
     signals.extend(route.extras)
     return {
-        "code": product.code,
-        "name": product.name,
-        "exchange": product.exchange,
-        "sector": product.sector,
-        "sector_label": SECTOR_LABELS.get(product.sector, product.sector),
-        "note": product.note,
+        "code": instrument.code,
+        "name": instrument.name,
+        "exchange": instrument.exchange,
+        "sector": instrument.sector,
+        "sector_label": label,
+        "note": instrument.note,
         "signals": signals,
         "yahoo": route.yahoo,
         "cftc": route.cftc,
-        "case_count": case_count,
     }
 
 
 def build_overview(catalog: Catalog | None = None) -> dict:
     loaded = catalog or load_catalog()
-    sectors = []
-    for sector in loaded.sectors:
-        sectors.append(
-            {
-                "id": sector.id,
-                "title": sector.title,
-                "label": SECTOR_LABELS.get(sector.id, sector.id),
-                "summary": sector.summary,
-                "product_count": len(sector.products),
-                "case_count": len(sector.cases),
-            }
-        )
-    rows = []
-    for code, sector_id in FOCUS:
-        product = loaded.get(code, sector=sector_id)
-        if product is None:
-            continue
-        sector = loaded.sector(sector_id)
-        rows.append(_product_row(product, len(sector.cases) if sector else 0))
+    labels = {mode.id: mode.label for mode in loaded.sectors}
+    sectors = [
+        {
+            "id": mode.id,
+            "title": mode.title,
+            "label": mode.label,
+            "summary": mode.summary,
+            "questions": mode.questions,
+            "calendars": mode.calendars,
+            "product_count": len(mode.products),
+        }
+        for mode in loaded.sectors
+    ]
+    rows = [_row(item, labels.get(item.sector, item.sector)) for item in loaded.products]
     return {
         "generated_at": _now(),
-        "disclaimer": "关注列表是工作台默认观察池，不是持仓；不展示未核验的盈亏。",
+        "disclaimer": "观察池用于套用分析模式，不是持仓；规格不在本台填写。",
         "kpis": [
-            {"label": "关注品种", "value": str(len(rows)), "sub": "默认观察池"},
-            {"label": "知识模块", "value": str(len(sectors)), "sub": "AkiraL1/Futures"},
-            {"label": "已索引品种", "value": str(len(loaded.products)), "sub": "代码/简称表"},
-            {"label": "研究案例", "value": str(sum(item["case_count"] for item in sectors)), "sub": "modules/*/cases"},
+            {"label": "观察品种", "value": str(len(rows)), "sub": "工作台维护"},
+            {"label": "分析模式", "value": str(len(sectors)), "sub": "Futures 透镜"},
+            {"label": "报告章节", "value": str(len(REPORT_SECTIONS)), "sub": "固定结构"},
+            {"label": "信号源", "value": "oracle", "sub": "digital-oracle"},
         ],
         "sectors": sectors,
         "tape": rows,
-        "cases": [
-            {
-                "sector": case.sector,
-                "title": case.title,
-                "relpath": case.relpath,
-                "excerpt": case.excerpt,
-            }
-            for sector in loaded.sectors
-            for case in sector.cases
-        ],
+        "template": [{"key": key, "title": title} for key, title in REPORT_SECTIONS],
     }
 
 

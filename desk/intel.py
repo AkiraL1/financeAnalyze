@@ -1,32 +1,30 @@
 from catalog.models import Catalog
-from desk.watchlist import SECTOR_LABELS
 from oracle.models import OracleSnapshot
 
 
-def _case_items(catalog: Catalog) -> list[dict]:
+def _mode_items(catalog: Catalog) -> list[dict]:
     items: list[dict] = []
-    for sector in catalog.sectors:
-        label = SECTOR_LABELS.get(sector.id, sector.id)
-        for case in sector.cases:
+    for mode in catalog.sectors:
+        for question in mode.questions:
             items.append(
                 {
-                    "source": "Futures cases",
-                    "kind": "research",
-                    "title": case.title,
-                    "body": case.excerpt,
-                    "related": label,
-                    "path": case.relpath,
+                    "source": f"{mode.label}透镜",
+                    "kind": "focus",
+                    "title": question,
+                    "body": mode.summary,
+                    "related": mode.label,
+                    "path": "",
                 }
             )
-        for bullet in sector.bullets[:4]:
+        for calendar in mode.calendars:
             items.append(
                 {
-                    "source": "模块日历",
+                    "source": "分析日历",
                     "kind": "calendar",
-                    "title": f"{label} · 季节性 / 报告窗口",
-                    "body": bullet,
-                    "related": label,
-                    "path": f"modules/{sector.id}/README.md",
+                    "title": f"{mode.label} · {calendar}",
+                    "body": "这是分析模式里的时间窗口，不是从 Futures 仓库摘录的研报。",
+                    "related": mode.label,
+                    "path": "",
                 }
             )
     return items
@@ -41,7 +39,7 @@ def _oracle_items(snapshot: OracleSnapshot) -> list[dict]:
                 "source": "CNN Fear & Greed",
                 "kind": "oracle",
                 "title": f"情绪 {fear.get('rating', '')}  ·  {fear.get('score', '')}",
-                "body": "数字来自 digital-oracle FearGreedProvider，不是交易指令。",
+                "body": "digital-oracle 交易数据信号，不是观点。",
                 "related": "宏观",
                 "path": "",
             }
@@ -77,11 +75,7 @@ def _oracle_items(snapshot: OracleSnapshot) -> list[dict]:
 
 
 def build_intel(catalog: Catalog, snapshot: OracleSnapshot | None = None) -> dict:
-    items = _case_items(catalog)
+    items = _mode_items(catalog)
     if snapshot is not None:
         items = _oracle_items(snapshot) + items
-    return {
-        "live": snapshot is not None,
-        "count": len(items),
-        "items": items,
-    }
+    return {"live": snapshot is not None, "count": len(items), "items": items}

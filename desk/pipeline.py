@@ -1,7 +1,9 @@
-from catalog.loader import load_catalog
-from catalog.models import Catalog
+from catalog.models import Catalog, Instrument
+from catalog.registry import load_catalog
+from catalog.template import MODE_SOURCE
 from desk.models import DeskBriefing
 from desk.notes import compose_notes
+from desk.report import compose_report
 from oracle.gateway import OracleGateway
 from oracle.live import live_gateway
 
@@ -15,23 +17,20 @@ def build_briefing(
     gateway: OracleGateway | None = None,
 ) -> DeskBriefing:
     loaded = catalog or load_catalog()
-    product = loaded.get(code, sector=sector)
-    if product is None:
-        raise KeyError(f"unknown futures product: {code}")
-    sector = loaded.sector(product.sector)
-    if sector is None:
-        raise KeyError(f"unknown sector: {product.sector}")
+    instrument = loaded.get(code, sector=sector)
+    if instrument is None:
+        raise KeyError(f"unknown instrument: {code}")
+    mode = loaded.sector(instrument.sector)
+    if mode is None:
+        raise KeyError(f"unknown analysis mode: {instrument.sector}")
     oracle = None
     if include_oracle:
-        oracle = (gateway or live_gateway()).snapshot(product)
+        oracle = (gateway or live_gateway()).snapshot(instrument)
     return DeskBriefing(
-        product=product,
-        sector=sector,
-        cases=sector.cases,
+        product=instrument,
+        sector=mode,
+        report=compose_report(instrument, mode, oracle),
         oracle=oracle,
-        notes=compose_notes(product, oracle),
-        knowledge_disclaimer=(
-            "品种清单、季节性与案例摘录来自 AkiraL1/Futures；"
-            "市场信号来自 AkiraL1/digital-oracle。"
-        ),
+        notes=compose_notes(instrument, oracle),
+        knowledge_disclaimer=MODE_SOURCE,
     )

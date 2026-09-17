@@ -2,20 +2,17 @@ from __future__ import annotations
 
 import argparse
 
-from catalog.loader import load_catalog
+from catalog.registry import load_catalog
 from desk.formatters import format_briefing
 from desk.pipeline import build_briefing
 
 
 def _cmd_catalog() -> int:
     catalog = load_catalog()
-    for sector in catalog.sectors:
-        print(f"[{sector.id}] {sector.title}  ({len(sector.products)} 个品种)")
-        for product in sector.products[:8]:
-            print(f"  {product.code:12} {product.name}  ({product.exchange})")
-        extra = len(sector.products) - 8
-        if extra > 0:
-            print(f"  … 另有 {extra} 个品种")
+    for mode in catalog.sectors:
+        print(f"[{mode.id}] {mode.label}  ({len(mode.products)} 个观察品种)")
+        for product in mode.products:
+            print(f"  {product.code:8} {product.name}  ({product.exchange})")
     return 0
 
 
@@ -32,10 +29,10 @@ def _cmd_desk(code: str, oracle: bool, sector: str | None) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="finance-analyze")
     sub = parser.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("catalog", help="列出 Futures 知识库品种")
-    desk = sub.add_parser("desk", help="生成分析台简报")
+    sub.add_parser("catalog", help="列出分析模式与观察品种")
+    desk = sub.add_parser("desk", help="按 Futures 模式生成简报")
     desk.add_argument("--code", required=True, help="品种代码，如 GC / CL / ES")
-    desk.add_argument("--sector", help="模块 id，用于消歧义，如 energy / metals")
+    desk.add_argument("--sector", help="分析模式 id，如 energy / metals")
     desk.add_argument("--oracle", action="store_true", help="拉取 digital-oracle 信号")
     args = parser.parse_args(argv)
     if args.cmd == "catalog":

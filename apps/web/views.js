@@ -17,20 +17,17 @@ function pageHead(title, sub, extra = "") {
 views.overview = async function overview() {
   const data = await ensureOverview();
   $("page").innerHTML = `
-    ${pageHead("工作台总览", "Futures 知识模块覆盖 + 默认观察池，不是持仓盈亏")}
+    ${pageHead("工作台总览", "用 Futures 的报告结构观察品种；数据来自 digital-oracle，不是知识库摘录")}
     ${kpiGrid(data.kpis)}
     <div class="split">
       <div class="card">
-        <h2>模块覆盖</h2>
+        <h2>分析模式覆盖</h2>
         <canvas id="sectorChart"></canvas>
       </div>
       <div class="card">
-        <h2>研究摘录</h2>
-        ${(data.cases || []).slice(0, 3).map((item) => `
-          <div class="news-item">
-            <h3>${esc(item.title)}</h3>
-            <pre class="muted">${esc(stripMd(item.excerpt))}</pre>
-          </div>`).join("") || "<p class='muted'>暂无 cases</p>"}
+        <h2>报告结构</h2>
+        <ol>${(data.template || []).map((item) => `<li>${esc(item.title)}</li>`).join("")}</ol>
+        <p class="muted">${esc(data.disclaimer)}</p>
       </div>
     </div>
   `;
@@ -40,7 +37,7 @@ views.overview = async function overview() {
       type: "bar",
       data: {
         labels: data.sectors.map((item) => item.label),
-        datasets: [{ label: "品种数", data: data.sectors.map((item) => item.product_count), backgroundColor: "#e3920f" }],
+        datasets: [{ label: "观察品种", data: data.sectors.map((item) => item.product_count), backgroundColor: "#e3920f" }],
       },
       options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#8b9bb0" } }, y: { ticks: { color: "#8b9bb0" } } } },
     });
@@ -57,7 +54,7 @@ views.board = async function board() {
       <table>
         <thead>
           <tr>
-            <th>名称 / 代码</th><th>模块</th><th>交易所</th><th>信号路由</th><th>案例</th><th>操作</th>
+            <th>名称 / 代码</th><th>分析模式</th><th>交易所</th><th>信号路由</th><th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -67,10 +64,9 @@ views.board = async function board() {
               <td>${esc(row.sector_label)}</td>
               <td>${esc(row.exchange)}</td>
               <td>${(row.signals || []).map((item) => `<span class="chip">${esc(item)}</span>`).join("")}</td>
-              <td>${esc(row.case_count)}</td>
               <td class="row-actions">
                 <button class="btn ghost" data-go="diagnose" data-code="${esc(row.code)}" data-sector="${esc(row.sector)}">诊断</button>
-                <button class="btn ghost" data-go="research" data-code="${esc(row.code)}" data-sector="${esc(row.sector)}">研究</button>
+                <button class="btn ghost" data-go="research" data-code="${esc(row.code)}" data-sector="${esc(row.sector)}">模式</button>
               </td>
             </tr>`).join("")}
         </tbody>
@@ -88,27 +84,29 @@ views.board = async function board() {
 
 views.research = async function research() {
   const data = await ensureOverview();
-  const sectors = await getJson("/api/sectors");
   const current = state.diagnose.sector;
-  const products = await getJson("/api/products?sector=" + encodeURIComponent(current));
+  const mode = (data.sectors || []).find((item) => item.id === current) || data.sectors[0];
+  const products = await getJson("/api/products?sector=" + encodeURIComponent(mode.id));
   $("page").innerHTML = `
-    ${pageHead("标的研究", "按 Futures 模块阅读品种清单与要点")}
+    ${pageHead("分析模式", "Futures 透镜：问什么、看什么窗口；不粘贴该仓库文档")}
     <div class="tabs">
-      ${sectors.sectors.map((item) => `<button data-sector="${esc(item.id)}" class="${item.id === current ? "active" : ""}">${esc(item.id)}</button>`).join("")}
+      ${data.sectors.map((item) => `<button data-sector="${esc(item.id)}" class="${item.id === mode.id ? "active" : ""}">${esc(item.label)}</button>`).join("")}
     </div>
     <div class="split">
       <div class="card">
         ${(products.products || []).map((item) => `
           <div class="news-item">
             <strong>${esc(item.code)}</strong> ${esc(item.name)}
-            <div class="muted">${esc(item.exchange)} ${esc(item.note)}</div>
+            <div class="muted">${esc(item.exchange)}</div>
           </div>`).join("")}
       </div>
       <div class="card">
-        <h2>模块摘录</h2>
-        ${(data.sectors.find((item) => item.id === current) || {}).summary
-          ? `<p>${esc((data.sectors.find((item) => item.id === current) || {}).summary)}</p>`
-          : "<p class='muted'>无摘要</p>"}
+        <h2>${esc(mode.title)}</h2>
+        <p>${esc(mode.summary)}</p>
+        <h2>分析焦点</h2>
+        <ul>${(mode.questions || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+        <h2>时间窗口</h2>
+        <ul>${(mode.calendars || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       </div>
     </div>
   `;
@@ -123,14 +121,13 @@ views.research = async function research() {
 views.notes = async function notes() {
   const data = await ensureOverview();
   $("page").innerHTML = `
-    ${pageHead("研究摘录", "来自 Futures modules/*/cases，原文仍以知识库为准")}
+    ${pageHead("报告模板", "固定六段结构，对应 Futures 的合约分析模式")}
     <div class="news">
-      ${(data.cases || []).map((item) => `
+      ${(data.template || []).map((item, index) => `
         <div class="card news-item">
-          <div class="muted">${esc(item.sector)} · ${esc(item.relpath)}</div>
+          <div class="muted">第 ${index + 1} 段</div>
           <h3>${esc(item.title)}</h3>
-          <pre class="muted">${esc(stripMd(item.excerpt))}</pre>
-        </div>`).join("") || "<div class='card muted'>尚无案例</div>"}
+        </div>`).join("")}
     </div>
   `;
 };

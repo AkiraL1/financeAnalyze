@@ -1,7 +1,6 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FUTURES_ROOT = ROOT / "third_party" / "futures"
 ORACLE_ROOT = ROOT / "third_party" / "digital-oracle"
 WEB_ROOT = ROOT / "apps" / "web"
 

@@ -2,8 +2,8 @@ from catalog.models import Product
 from oracle.models import OracleSnapshot
 
 _DISCLAIMER = (
-    "本台不生成合约乘数、Tick、保证金、涨跌停等规格数字。"
-    "规格以 Futures 知识库与交易所官网核验为准。"
+    "本台不生成合约乘数、Tick、保证金、涨跌停。"
+    "Futures 仓库只提供分析模式，不作为规格知识库。"
 )
 
 
@@ -54,7 +54,7 @@ def _mm_net(snapshot: OracleSnapshot) -> int | None:
 
 def compose_notes(product: Product, oracle: OracleSnapshot | None) -> list[str]:
     notes = [
-        f"{product.code} {product.name} @ {product.exchange}，知识模块 `{product.sector}`。",
+        f"{product.code} {product.name} @ {product.exchange}，分析模式 `{product.sector}`。",
         _DISCLAIMER,
     ]
     if oracle is None:

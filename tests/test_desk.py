@@ -1,5 +1,5 @@
-from catalog.loader import load_catalog
 from catalog.models import Product
+from catalog.registry import load_catalog
 from desk.pipeline import build_briefing
 from oracle.gateway import OracleGateway
 
@@ -8,7 +8,12 @@ def test_build_briefing_without_oracle():
     briefing = build_briefing("GC", include_oracle=False)
     assert briefing.product.code == "GC"
     assert briefing.oracle is None
+    keys = [section["key"] for section in briefing.report]
+    assert keys[0] == "background"
+    assert keys[2] == "specs"
     assert any("不生成" in note for note in briefing.notes)
+    assert "分析模式参考" in briefing.knowledge_disclaimer
+    assert all(section["key"] != "cases" for section in briefing.report)
 
 
 def test_build_briefing_with_fake_oracle():
@@ -29,3 +34,5 @@ def test_build_briefing_with_fake_oracle():
     assert briefing.oracle is not None
     assert "fear_greed" in briefing.oracle.results
     assert any("Extreme Fear" in note for note in briefing.notes)
+    process = next(section for section in briefing.report if section["key"] == "process")
+    assert any("Managed Money" in line for line in process["body"])

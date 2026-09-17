@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query
 
-from catalog.loader import load_catalog
+from catalog.registry import load_catalog
 from desk.board import build_board, build_overview
 from desk.intel import build_intel
 from desk.review import build_review

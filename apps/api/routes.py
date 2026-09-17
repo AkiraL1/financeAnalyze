@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 from fastapi import APIRouter, HTTPException, Query
 
-from catalog.loader import load_catalog
+from catalog.registry import load_catalog
 from desk.formatters import briefing_payload
 from desk.pipeline import build_briefing
 
@@ -20,13 +20,14 @@ def sectors() -> dict:
     return {
         "sectors": [
             {
-                "id": sector.id,
-                "title": sector.title,
-                "summary": sector.summary,
-                "product_count": len(sector.products),
-                "case_count": len(sector.cases),
+                "id": mode.id,
+                "title": mode.title,
+                "label": mode.label,
+                "summary": mode.summary,
+                "product_count": len(mode.products),
+                "questions": mode.questions,
             }
-            for sector in catalog.sectors
+            for mode in catalog.sectors
         ]
     }
 
@@ -34,11 +35,11 @@ def sectors() -> dict:
 @router.get("/api/products")
 def products(sector: str | None = None) -> dict:
     catalog = load_catalog()
-    items = []
-    for product in catalog.products:
-        if sector and product.sector != sector:
-            continue
-        items.append(asdict(product))
+    items = [
+        asdict(item)
+        for item in catalog.products
+        if not sector or item.sector == sector
+    ]
     items.sort(key=lambda row: (row["sector"], row["code"]))
     return {"products": items}
 

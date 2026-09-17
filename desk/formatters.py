@@ -7,23 +7,16 @@ def format_briefing(briefing: DeskBriefing) -> str:
     product = briefing.product
     lines = [
         f"# {product.code}  {product.name}",
-        f"交易所：{product.exchange}    模块：{product.sector}",
+        f"交易所：{product.exchange}    模式：{briefing.sector.label}",
         "",
         briefing.knowledge_disclaimer,
         "",
-        "## 知识库",
-        briefing.sector.summary or briefing.sector.title,
     ]
-    if product.note:
-        lines.append(f"备注：{product.note}")
-    if briefing.sector.bullets:
-        lines.append("要点：")
-        lines.extend(f"- {item}" for item in briefing.sector.bullets)
-    if briefing.cases:
-        lines.append("案例：")
-        for case in briefing.cases:
-            lines.append(f"- {case.title} ({case.relpath})")
-    lines.append("")
+    for section in briefing.report:
+        lines.append(f"## {section['title']}")
+        for line in section["body"]:
+            lines.append(f"- {line}")
+        lines.append("")
     lines.append("## 备注")
     lines.extend(f"- {note}" for note in briefing.notes)
     if briefing.oracle is not None:
@@ -48,10 +41,12 @@ def briefing_payload(briefing: DeskBriefing) -> dict:
         "sector": {
             "id": briefing.sector.id,
             "title": briefing.sector.title,
+            "label": briefing.sector.label,
             "summary": briefing.sector.summary,
-            "bullets": briefing.sector.bullets,
+            "questions": briefing.sector.questions,
+            "calendars": briefing.sector.calendars,
         },
-        "cases": [asdict(case) for case in briefing.cases],
+        "report": briefing.report,
         "oracle": oracle,
         "notes": briefing.notes,
         "knowledge_disclaimer": briefing.knowledge_disclaimer,

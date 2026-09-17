@@ -9,7 +9,7 @@ views.diagnose = async function diagnose() {
     <button class="btn" id="runDiagnose">生成诊断</button>
   `;
   $("page").innerHTML = `
-    ${pageHead("品种诊断", "知识库要点 + 可选 digital-oracle 信号")}
+    ${pageHead("品种诊断", "按六段分析模式填写；信号来自 digital-oracle")}
     <div class="card" style="margin-bottom:12px">
       <div class="tabs">
         ${sectors.sectors.map((item) => `<button data-sector="${esc(item.id)}" class="${item.id === state.diagnose.sector ? "active" : ""}">${esc(item.id)}</button>`).join("")}
@@ -53,8 +53,10 @@ function renderDiagnose(data) {
       <div class="card">
         <h2>${esc(data.product.code)} ${esc(data.product.name)}</h2>
         <p class="muted">${esc(data.knowledge_disclaimer)}</p>
-        <ul>${(data.sector.bullets || []).map((item) => `<li>${esc(stripMd(item))}</li>`).join("")}</ul>
-        ${(data.cases || []).map((item) => `<pre class="muted">${esc(stripMd(item.excerpt))}</pre>`).join("")}
+        ${(data.report || []).map((section) => `
+          <h2>${esc(section.title)}</h2>
+          <ul>${(section.body || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+        `).join("")}
       </div>
       <div class="card">
         <h2>综合备注</h2>
@@ -73,13 +75,13 @@ views.intel = async function intel() {
   }
   const items = (state.intel.data.items || []).filter((item) => kind === "all" || item.kind === kind);
   $("page").innerHTML = `
-    ${pageHead("市场资讯", "知识库日历 / 案例，可抓取 digital-oracle 预测市场与情绪")}
+    ${pageHead("市场资讯", "模式日历 + 可抓取的 digital-oracle 交易数据")}
     <div class="page-head">
       <div class="tabs">
         <button data-kind="all" class="${kind === "all" ? "active" : ""}">全部</button>
         <button data-kind="oracle" class="${kind === "oracle" ? "active" : ""}">市场信号</button>
-        <button data-kind="calendar" class="${kind === "calendar" ? "active" : ""}">报告窗口</button>
-        <button data-kind="research" class="${kind === "research" ? "active" : ""}">研究案例</button>
+        <button data-kind="calendar" class="${kind === "calendar" ? "active" : ""}">时间窗口</button>
+        <button data-kind="focus" class="${kind === "focus" ? "active" : ""}">分析焦点</button>
       </div>
       <button class="btn" id="fetchIntel">抓取</button>
     </div>
