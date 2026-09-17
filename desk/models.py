@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from catalog.models import AnalysisMode, Instrument
 from oracle.models import OracleSnapshot
@@ -13,3 +13,4 @@ class DeskBriefing:
     notes: list[str]
     knowledge_disclaimer: str
     analyst: str = "template"
+    trace: list[dict[str, object]] = field(default_factory=list)

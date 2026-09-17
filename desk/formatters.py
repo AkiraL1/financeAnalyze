@@ -19,6 +19,12 @@ def format_briefing(briefing: DeskBriefing) -> str:
         lines.append("")
     lines.append("## 备注")
     lines.extend(f"- {note}" for note in briefing.notes)
+    if briefing.trace:
+        lines.append("")
+        lines.append("## 分析循环")
+        for item in briefing.trace:
+            tool = item.get("tool") or "final"
+            lines.append(f"- T{item.get('turn')} {tool}")
     if briefing.oracle is not None:
         lines.append("")
         lines.append("## digital-oracle")
@@ -51,4 +57,5 @@ def briefing_payload(briefing: DeskBriefing) -> dict:
         "notes": briefing.notes,
         "knowledge_disclaimer": briefing.knowledge_disclaimer,
         "analyst": briefing.analyst,
+        "trace": briefing.trace,
     }

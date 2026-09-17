@@ -31,20 +31,34 @@ digital-oracle 适配层。不写分析模式。
 
 ## `desk`
 
-按 Futures 模式填报告：有 MiniMax 密钥时用模型写六段正文，失败回退模板；oracle 只提供交易数据。不编造合约规格，不摘录 Futures 文档。每日简报不调用模型。
+按 Futures 模式填报告：MiniMax 先 `plan_tasks` 拆解，再循环调用 `get_oracle` / `ego_browser` / `run_task`，最后 `submit_report`。无密钥或循环失败回退模板。不编造合约规格。每日简报不调用模型。
 
 | 文件 | 职责 |
 |------|------|
 | `report.py` | 六段模板填充 |
-| `analyst.py` | MiniMax 六段 JSON → 报告 |
-| `llm.py` | MiniMax Chat Completions 客户端 |
+| `analyst.py` | 无工具客户端时的六段 JSON 回退 |
+| `llm.py` | MiniMax Chat Completions（含 tool_calls） |
+| `agent/` | 任务板、循环、白名单浏览器快照 |
 | `pipeline.py` | `build_briefing` |
 | `board.py` | 总览 / 观察池 |
 | `intel.py` | 模式焦点 + oracle 资讯 |
 | `review.py` | 每日简报（模板，不调 LLM） |
 | `notes.py` / `formatters.py` | 备注与文本 |
 
-公开接口：`build_briefing(..., include_llm=)`、`llm_status()`。
+公开接口：`build_briefing(..., include_llm=)`、`llm_status()`、`fill_report_with_agent()`。
+
+### `desk.agent`
+
+参考公开的 Agent 循环（模型 → 工具 → 结果 → 再决策），不是复制任何闭源实现。
+
+| 文件 | 职责 |
+|------|------|
+| `loop.py` | `run_loop` / `supports_tools` |
+| `tasks.py` | 任务拆解板 |
+| `browser.py` | `ego_browser` CLI 或 HTTP 语义快照（域名白名单） |
+| `schemas.py` | MiniMax function tools |
+| `session.py` | 工具执行与子任务循环 |
+| `run.py` | 协调员入口 `fill_report_with_agent` |
 
 ## `finance_analyze`
 

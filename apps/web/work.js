@@ -10,7 +10,7 @@ views.diagnose = async function diagnose() {
     <button class="btn" id="runDiagnose">生成诊断</button>
   `;
   $("page").innerHTML = `
-    ${pageHead("品种诊断", "六段正文默认由 MiniMax 填写；信号来自 digital-oracle")}
+    ${pageHead("品种诊断", "MiniMax 先拆任务再循环调工具；信号来自 digital-oracle / 官网快照")}
     <div class="card" style="margin-bottom:12px">
       <div class="tabs">
         ${sectors.sectors.map((item) => `<button data-sector="${esc(item.id)}" class="${item.id === state.diagnose.sector ? "active" : ""}">${esc(item.id)}</button>`).join("")}
@@ -63,6 +63,10 @@ function renderDiagnose(data) {
       <div class="card">
         <h2>综合备注</h2>
         <ul>${(data.notes || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+        <h2>分析循环</h2>
+        ${(data.trace || []).length
+          ? `<ul>${data.trace.map((item) => `<li>T${esc(item.turn)} ${esc(item.tool || "final")}${item.result ? ` · ${esc(String(item.result).slice(0, 80))}` : ""}</li>`).join("")}</ul>`
+          : "<p class='muted'>本次无工具循环（模板或单次 JSON）。</p>"}
         <h2>Oracle</h2>
         <pre class="muted">${esc(JSON.stringify(data.oracle ? { results: Object.keys(data.oracle.results || {}), errors: data.oracle.errors } : "未拉取", null, 2))}</pre>
       </div>
